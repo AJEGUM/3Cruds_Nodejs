@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crud personas e imagenes</title>
+    <link rel="stylesheet" href="/src/frontend/index_query.css">
+</head>
+<body>
+    <h1>Gestion de Personas</h1>
+    <!-- Formulario para crear/editar personas -->
+    <form id="personaForm">
+        <input type="hidden" id="id_persona">
+        <!-- Campo oculto para almacenar el ID cuando se edita una persona -->
+        <!-- Contenedor <div> utilizado para mantenerla estructura del formulario y facilitar el estilo con margenes o diseño en bloque
+            En esta variante , el <label> contiene directamente al <input>, lo que simplifica el HTML y asegura la asosiacion entre ambos sin necesidad del atributo 'for'
+            Esta estructura tambien mejor la accesibilidad y permite que al hacer clic sobre el texto del label se active el campo de entrada -->
+        <div>
+            <label>Nombre:
+                <input type="text" id="nombre" required>
+            </label>
+        </div>
+
+        <div>
+            <label>Apellido: 
+                <input type="text" id="apellido" required>
+            </label>
+        </div>
+        <div>
+            <label>tipo_identificacion: 
+                <select id="tipo_identificacion">
+                    <option value="CC">Cedula de Ciudadania</option>
+                    <option value="TI">Tarjeta de Identidad</option>
+                    <option value="CE">Cedula de Extranjeria</option>
+                </select>
+            </label>
+        </div>
+
+        <div>
+            <label>Numero de Identificacion: 
+                <input type="number" id="nuip" required>
+            </label>
+        </div>
+
+        <div>
+            <label>emai: 
+                <input type="email" id="emai" required>
+            </label>
+        </div>
+
+        <div>
+            <label>Contraseña: 
+                <input type="password" id="clave" required>
+            </label>
+        </div>
+
+        <div>
+            <label>Salario: 
+                <input type="number" id="salario" step="0.01" required>
+            </label>
+        </div>
+
+        <div>
+            <label>Activo: 
+                <input type="checkbox" id="activo" required>
+            </label>
+        </div>
+
+        <div>
+            <label for="imagen">Imagen:</label>
+            <input type="file" id="imagen" accept="image/*">
+            <img id="previewImagen">
+        </div>
+
+        <button type="submit" id="btnGuardar">Guardar</button>
+        <button type="button" id="btnCancelar">Cancelar</button>
+    </form>
+
+    <!-- Tabla para mostrar las personas -->
+    <table id="tablaPersonas">
+        <thead>
+            <tr>ID</tr>
+            <tr>Nombre</tr>
+            <tr>Apellido</tr>
+            <tr>emai</tr>
+            <tr>Imagen</tr>
+            <tr>Acciones</tr>
+        </thead>
+        <tbody id="tablaPersonasBody">
+            <!-- los datos se cargan dinamicamante -->
+        </tbody>
+    </table>
+
+    <template id="template">
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                <button class="btn-editar">Editar</button>
+                <button class="btn-eliminar">Eliminar</button>
+            </td>
+        </tr>
+    </template>
+    <!-- Elemento <template> que actua como una plantilla HTML reutilizable.
+        Define un fila (<tr>) con celdas (<td>) que seran rellenados dinamicamente con datos de personas desde JavaScript
+        Esta tecnica permite clonar la fila cuando se necesita mostrar nuevos registros sin tener que escribir HMTL desde cero cada vez
+        Las ultimas celdas incluyen botones "Editar" y "Eliminar" con clases especificas para identificar y manejar eventos desde el script.
+        Este enfoque mejora la eficiencia del codigo y mantiene el HTML mas limpio. -->
+
+    <script src="index_query.js"></script>
+    <!-- Inclusion del archivo JavaScript externo 'index.js'.
+    Este script contiene la logica del CRUD (crear, Leer, Actualizar y Eliminar), asi como la interaccion con el formulario y la tabla.
+    Al cargarlo al final del body, se asegura que el DOM este completamente disponible cuando el script se ejecute-->
+</body>
+</html>
