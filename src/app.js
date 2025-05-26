@@ -23,6 +23,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb'}))
 //Rutas
 app.use('/api/personas', require('./routes/personas.routes'))
 app.use('/api/proveedor', require('./routes/proveedor.routes'))
+app.use('/api/psicologos', require('./routes/psicologos.routes'))
 app.use('/api/imagenes', imagenesRoutes)
 //Asocia todas las rutas de personas bajo el prefijo /api/personas
 

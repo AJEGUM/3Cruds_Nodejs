@@ -1,19 +1,24 @@
 //Variables globales
 const API_URL = 'http://localhost:3000/api' //Constante que almacena la URL que se conectara al servidor
 let personas = [] //Variable que almacenara el listado de personas obtenidos del backend 
+let psicologos = []
 
 //Elementos del DOM
 const personaForm = document.getElementById('personaForm') //Formulario principal
 const tablaPersonasBody = document.getElementById('tablaPersonasBody') //Cuerpo de la tabla donde se insertan las filas
 const btnCancelar = document.getElementById('btnCancelar') //Este boton de cancelar limpia el formulario
+const btnPDF = document.getElementById('btnPDF')
 const imagenInput = document.getElementById('imagen') //Input de tipo archivo para subir o cargar la imagen
 const previewImagen = document.getElementById('previewImagen') //Elemento imagen de previsualizacion
 
 //Event Listeners
-document.addEventListener('DOMContentLoaded', cargarPersonas) //Cuando el DOM este listo, se cargan las personas
+document.addEventListener('DOMContentLoaded',() =>{
+    cargarPersonas()
+    cargarPsicologos()
+}) //Cuando el DOM este listo, se cargan las personas (El DomContentLoaded, Sirve para cargar primero el html y despues las funciones que se van a utilizar, se hace de esta forma ya que si se carga primero el script antes del html puede generar error)
 personaForm.addEventListener('submit', manejarSubmit) //Al enviar el formulario, se ejecuta la funcion manejarSubmit que escucha el click
 btnCancelar.addEventListener('click', limpiarFormulario) //Al hacer click en cancelar, se limpia el formulario
-imagenInput.addEventListener('change', manejarImagen) //Al cambiar la imagen, se llama manejarImagen para previsualizar
+imagenInput.addEventListener('change', manejarImagen) //Al cambiar la imagen, se llama manejarImagen para previsualizar (El change, es un evento el cual se ejecuta cuando un usuario selecciona un archivo nuevo con el selector de archivos O reemplaza el archivo anterior por otro)
 
 //Funciones para el manejo de personas
 async function cargarPersonas(){
@@ -26,12 +31,33 @@ async function cargarPersonas(){
     }
 }
 
-//Iterar sobre cada persona y crear una fila en la tabla
+async function cargarPsicologos() {
+    try {
+        const response = await fetch(`${API_URL}/psicologos`);
+        psicologos = await response.json(); // Guardo la lista globalmente
+
+        const selectPsicologo = document.getElementById('psicologo');
+        selectPsicologo.innerHTML = '<option value="">Seleccione un psicólogo</option>';
+
+        psicologos.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.id_psicologo;
+            option.textContent = p.nombre;
+            selectPsicologo.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error al cargar psicólogos:', error);
+    }
+}
+
+//Iterar sobre cada persona y crear una fila en la tabla (Este bucle pasa por cada dato y lo renderiza en la tabla)
 async function mostrarPersonas() {
     tablaPersonasBody.innerHTML = '' //Limpiar el contenido actual
 
     for(const persona of personas){
         const tr = document.createElement('tr') //Crear una fila HTML
+        const psicologoObj = psicologos.find(p => p.id_psicologo === Number(persona.psicologo));
+        const psicologoNombre = psicologoObj ? psicologoObj.nombre : 'No asignado';
 
         //Cargar la imagen si existe
         let imagenHTML = 'Sin imagen'
@@ -40,7 +66,7 @@ async function mostrarPersonas() {
             //Se realiza una peticion al backend para obtener la imagen de la persona en base64
             const data = await response.json()
             if(data.imagen){
-                imagenHTML = `<img src="data:image/jpeg;base64,${data.imagen}" style="max-width: 100px; max.height: 100px;">`
+                imagenHTML = `<img src="data:image/jpeg;base64,${data.imagen}" style="max-width: 200px; max.height: 100px;">`
             }
         }catch(error){
             console.error('Error al cargar la imagen', error)
@@ -48,14 +74,14 @@ async function mostrarPersonas() {
         // Se construye la fila HTML con los datos de la persona y los botones de accion
         // Se utiliza template literals para facilitar la insercion de variables en el HTML
         tr.innerHTML = `
-            <td style="border: 1px solid #ddd; text-align: center; padding: 8px;">${persona.id_persona}</td>
             <td style="border: 1px solid #ddd; text-align: center; padding: 8px;">${persona.nombre}</td>
             <td style="border: 1px solid #ddd; text-align: center; padding: 8px;">${persona.apellido}</td>
             <td style="border: 1px solid #ddd; text-align: center; padding: 8px;">${persona.emai}</td>
             <td style="border: 1px solid #ddd; text-align: center; padding: 8px;">${imagenHTML}</td>
+            <td style="border: 1px solid #ddd; text-align: center; padding: 8px;">${psicologoNombre}</td>
             <td style="border: 1px solid #ddd; text-align: center; padding: 8px;">
-                <button onclick="editarPersona(${persona.id_persona})">Editar</button>
-                <button onclick="eliminarPersona(${persona.id_persona})">Eliminar</button>
+                <button onclick="editarPersona(${persona.id_persona})" style="background: yellow">Editar</button>
+                <button onclick="eliminarPersona(${persona.id_persona})" style="background: red">Eliminar</button>
             </td>
             `
             tablaPersonasBody.appendChild(tr) //Se añade la fila a la tabla
@@ -70,7 +96,6 @@ async function manejarSubmit(e){
     //Se utiliza parseInt y parseFloat para convertir los valores a numeros enteros o decimales
     //Se utiliza el operador || para asignar null si el campo esta vacio
     const persona = {
-        id_persona: document.getElementById('id_persona').value || null,
         nombre: document.getElementById('nombre').value,
         apellido: document.getElementById('apellido').value,
         tipo_identificacion: document.getElementById('tipo_identificacion').value,
@@ -79,6 +104,7 @@ async function manejarSubmit(e){
         clave: document.getElementById('clave').value,
         salario: parseFloat(document.getElementById('salario').value),
         activo: document.getElementById('activo').checked,
+        psicologo: parseInt(document.getElementById('psicologo').value) || null,
     }
 
     try{
@@ -190,7 +216,7 @@ async function editarPersona(id)
         //Cargar imagen si existe
         try{
             const response = await fetch(`${API_URL}/imagenes/obtener/personas/id_persona/${id}`)
-            const data = await response.json
+            const data = await response.json()
             if(data.imagen){
                 previewImagen.src = `data:image/jpeg;base64,${data.imagen}`
                 previewImagen.style.display = 'block'
@@ -221,7 +247,7 @@ function limpiarFormulario()
 function manejarImagen(e){
     const file = e.target.files[0]
     if(file){
-        const reader = new FileReader()
+        const reader = new FileReader() //FileReader, Es una clase de JS que permite leer archivos del dicos local del usuario, se usa para: Convertir imagen en base64(readAsDataURL) O mostrarla en la pagina antes de subirla(PreviewImagen)
         reader.onload = function(e){
             previewImagen.src = e.target.result
             previewImagen.style.display = 'block'
