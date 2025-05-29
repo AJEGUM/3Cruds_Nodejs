@@ -10,10 +10,76 @@ const imagenInput = document.getElementById('imagen') //input de imagen
 const previewImagen = document.getElementById('previewImagen') //Imagen para previsualizar la subida
 
 //Event Listeners
-document.addEventListener('DOMContentLoaded', cargarPersonas) //cargar personas al iniciar la pagina
+document.addEventListener('DOMContentLoaded', () =>{
+    //Verificar si el usuario esta autenticado
+    verificarAutenticacion()
+
+    //Mostrar nombre del usuario si esta autenticado
+    const usuarioNombre = localStorage.getItem('usuarioNombre')
+    const usuarioApellido = localStorage.getItem('usuarioApellido')
+
+    if(usuarioNombre && usuarioApellido){
+        const infoUsuario = document.createElement('div')
+        infoUsuario.innerHTML = `
+            <p>Bienvenido, ${usuarioNombre} ${usuarioApellido} |
+                <a href="#" id="btnCerrarSesion">Cerrar sesion</a>
+            </p>
+        `
+        document.body.insertBefore(infoUsuario, document.body.firstChild)
+
+        //Agregar listener para cerrar sesion
+        document.getElementById('btnCerrarSesion').addEventListener('click', cerrarSesion)
+    }
+
+    cargarPersonas()
+})
+
 personaForm.addEventListener('submit', manejarSubmit) //Enviar el formulario
 btnCancelar.addEventListener('click', limpiarFormulario) //Boton de cancelar limpia el formulario
 imagenInput.addEventListener('change', manejarImagen) //Cargar previsualizacion cuando se selecciona imagen
+
+//Verificar autenticacion
+function verificarAutenticacion(){
+    const usuarioId = localStorage.getItem('usuarioId')
+
+    if(!usuarioId){
+        //Si no hay ID usuario, redirigir al login
+        window.location.href = 'login.html'
+        return
+    }
+
+    //Verificar con el servidor si el usuario es valido
+    fetch(`${API_URL}/auth/verificar/${usuarioId}`)
+    .then(response => {
+        if(!response.ok){
+            throw new Error('Sesion Invalida')
+        }
+        return response.json()
+    })
+    .then(data => {
+        if(!data.success){
+            //Si la verificacion falla, limpiar localstorage y redirigir
+            localStorage.clear()
+            window.location.href = 'login.html'
+        }
+    })
+    .catch(error => {
+        console.error('Error al verificar sesion: ', error)
+        localStorage.clear()
+        window.location.href = 'login.html'
+    })
+}
+
+//Cerrar sesion
+function cerrarSesion(e){
+    e.preventDefault()
+
+    //Limpiar datos de autenticacion del localstorage
+    localStorage.clear()
+
+    //Redirigir al login
+    window.location.href = 'login.html'
+}
 
 //Funcion que obtiene personas del backend
 async function cargarPersonas() {
