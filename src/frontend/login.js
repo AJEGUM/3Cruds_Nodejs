@@ -49,7 +49,13 @@ async function manejarLogin(e) {
 
             //Redirigir a la pagina principal
             setTimeout(() => {
-                window.location.href = 'index._template.html'
+                if(resultado.usuario.rol === 'admin'){
+                    window.location.href = 'index._template.html'
+                }else if(resultado.usuario.rol === 'cliente'){
+                    window.location.href = 'cliente.html'
+                }else{
+                    mostrarMensaje('Tu rol no es autorizado en ninguna parte.')
+                }
             }, 1000)
         }else{
             mostrarMensaje(resultado.message, false)

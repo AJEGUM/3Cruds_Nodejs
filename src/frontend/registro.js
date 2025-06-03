@@ -28,6 +28,13 @@ async function manejarRegistro(e) {
     const email = document.getElementById('email').value
     const clave = document.getElementById('clave').value
     const confirmarClave = document.getElementById('confirmarClave').value
+    const rol = document.getElementById('rol').value
+
+    //Valirdar de que se seleccione un rol
+    if (!rol) {
+        mostrarMensaje('Por favor selecciona un rol.', false)
+        return
+    }
 
     //Validar que las contraseñas coincidan
     if(clave !== confirmarClave){
@@ -42,7 +49,7 @@ async function manejarRegistro(e) {
         telefono,
         email,
         clave,
-        rol: 'cliente' //Por defecto, asignamos rol de cliente
+        rol //Por defecto, asignamos rol de cliente //Pero en este caso se asignara el rol manualmente para PRUEBAS
     }
 
     try{
